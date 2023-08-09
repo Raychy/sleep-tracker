@@ -47,7 +47,7 @@ function googleSignin(){
        let errorCode = error.code;
        let errorMessage = error.message;
        let email = error.email;
-       // The firebase.auth.AuthCredential type that was used.
+       // The firebase.auth.AuthCredentil type that was used.
        let credential = error.credential;
     
     });

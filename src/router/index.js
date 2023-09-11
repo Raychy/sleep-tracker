@@ -1,21 +1,16 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { privateRoutes } from "../views/private/routes";
+import { publicRoutes } from "../views/public/routes";
+import { authRoutes } from "../views/auth/routes";
+import middlewarePipeline from "./kernel/middlewarePipeline";
+import { createPinia } from 'pinia'
+import { useAuthStore } from "../store";
+// console.log('trying...');
 const routes = [
-     {
-          path: "/",
-          name: "Homeview",
-          component: () =>
-          import(
-            /* webpackChunkName: "Home" */ "@/views/Home.vue"
-          ),
-     },
-     {
-          path: "/login",
-          name: "Loginview",
-          component: () =>
-          import(
-            /* webpackChunkName: "login" */ "@/views/Login.vue"
-          ),
-     },
+    ...privateRoutes,
+    ...publicRoutes,
+    ...authRoutes
+
 ];
 
 const router = createRouter({
@@ -23,23 +18,31 @@ const router = createRouter({
      routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   if (!to.meta.middleware) {
-//     return next();
-//   }
-//   const middleware = to.meta.middleware;
+router.beforeEach((to, from, next) => {
+  // console.log('tryin2...')
+  if (!to.meta.middleware) {
+    console.log('trying4 no middleware...')
+    return next();
+  }
+  
+  const pinia = createPinia()
+  const middleware = to.meta.middleware;
+  const store = useAuthStore(pinia)
+  
+  // console.log('heee', store.token)
 
-//   const context = {
-//     to,
-//     from,
-//     next,
-//     store,
-//   };
-//   return middleware[0]({
-//     ...context,
-//     next: middlewarePipeline(context, middleware, 1),
-//   });
-// });
+  const context = {
+    to,
+    from,
+    next,
+    store,
+  };
+  return middleware[0]({
+    ...context,
+    next: middlewarePipeline(context, middleware, 1),
+  });
+});
+// console.log('trying3...')
 // router.onError((error) => {
 //   if (/loading chunk \d* failed./i.test(error.message)) {
 //     window.location.reload();
